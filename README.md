@@ -1,6 +1,4 @@
-# old_tweets
-
-Get tweets
+# Get tweets
 
 Arguments:
 - q : str  # Query, e.g. '@barackobama #republicans'
@@ -34,13 +32,10 @@ for tweet in tweets:
 ```
 import tweetdigger
 
-tweets = tweetdigger.get(
+tweetdigger.get(
     q='@barackobama,
     since='2018-01-01',
     n_tweets=25,
     filename = 'output.csv',
 )
-
-for tweet in tweets:
-    print(tweet.text)
 ```
