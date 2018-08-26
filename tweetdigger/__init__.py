@@ -27,7 +27,7 @@ class TweetHolder():
 	pass
 
 
-def get_tweets(**kwargs):
+def get(**kwargs):
 
 		filename = kwargs.pop('filename', '')
 

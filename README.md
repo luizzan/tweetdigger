@@ -1,27 +1,45 @@
 # old_tweets
 
-Get old tweets<br>
-Heavily based on https://github.com/Jefferson-Henrique/GetOldTweets-python<br>
-Main differences are the use of a dictionary to pass parameters and the use of requests instead of urllib for getting data.
+Get tweets
+
+Arguments:
+- q : str  # Query, e.g. '@barackobama #republicans'
+- from : str  # Tweeted by @...
+- to : str  # Replying to @...
+- since : str  # YYYY-MM-DD
+- until : str  # YYYY-MM-DD
+- lang : str  # Language, e.g. 'en'
+- near : str  # Location, e.g. 'London'
+- within : str  # Radius around location, e.g. 15mi
+- n_tweets : int  # Number of tweets - use 0 for unlimited
+- filename : str  # Save tweets to file
 
 ## Usage example
 
 ```
-tw = OldTweets()
+import tweetdigger
 
-params = {
-    'q' : '@barackobama',  # Query
-    'from' : '',  # Tweeted by @...
-    'to' : '',  # Replying to @...
-    'since' : '2018-08-08',  # YYYY-MM-DD
-    'until' : '2018-08-09',  # YYYY-MM-DD
-    'lang' : '',  # Language
-    'near' : 'London',  # Location
-    'within' : '15mi',  # Radius around location
-    'n_tweets' : 0,  # Number of tweets, 0 for unlimited
-}
+tweets = tweetdigger.get(
+    q='@barackobama,
+    since='2018-01-01',
+    n_tweets=25,
+)
 
-tweets = tw.getTweets(params)
+for tweet in tweets:
+    print(tweet.text)
+```
+
+## Save to csv file
+
+```
+import tweetdigger
+
+tweets = tweetdigger.get(
+    q='@barackobama,
+    since='2018-01-01',
+    n_tweets=25,
+    filename = 'output.csv',
+)
 
 for tweet in tweets:
     print(tweet.text)
