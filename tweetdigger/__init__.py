@@ -8,6 +8,8 @@ import requests
 import urllib
 from bs4 import BeautifulSoup
 
+__version__ = '0.1.0'
+
 """
 kwargs
 - q : str  # Query
@@ -104,6 +106,10 @@ def _build_url(kwargs):
 	
 	url_add = ''
 	url_add += kwargs.pop('q', '')
+
+	_near = kwargs.pop('near', None)
+	if _near:
+		kwargs['near'] = '"' + _near + '"'
 	
 	for k, v in kwargs.items():
 		if v:
