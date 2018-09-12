@@ -8,7 +8,7 @@ import requests
 import urllib
 from bs4 import BeautifulSoup
 
-__version__ = '0.1.0'
+__version__ = '0.1.1'
 
 """
 kwargs
@@ -40,7 +40,7 @@ def get(**kwargs):
 		params['url'] = _build_url(kwargs)
 
 		if filename:
-			cols = ['date', 'username', 'text', 'retweets', 'favorites', 'id', 'permalink']
+			cols = ['date', 'username', 'text', 'retweets', 'favorites', 'id', 'permalink', 'verified']
 			with open(filename, 'w') as f:
 				csv.writer(f).writerow(cols)
 		
@@ -71,6 +71,7 @@ def get(**kwargs):
 							tweet.favorites,
 							tweet.id,
 							tweet.permalink,
+							tweet.verified,
 						]
 						tws.append(tw)
 
@@ -158,6 +159,8 @@ def _get_json_to_tweets(params):
 		tweet.favorites = int(tweet.favorites.find('span', 'ProfileTweet-actionCount')['data-tweet-stat-count'])
 		tweet.id = tw['data-item-id']
 		tweet.permalink = 'https://twitter.com' + tw['data-permalink-path']
+		tweet.verified = tw.find('span', 'FullNameGroup').find('span', 'Icon--verified')
+		tweet.verified = True if tweet.verified else False
 
 		tweet_batch.append(tweet)
 		

@@ -16,6 +16,18 @@ for tweet in tweets:
     print(tweet.text)
 ```
 
+Information available:
+```
+tweet.date
+tweet.username
+tweet.text
+tweet.retweets
+tweet.favorites
+tweet.id
+tweet.permalink
+tweet.verified
+```
+
 ## Save to csv file
 ```
 import tweetdigger
