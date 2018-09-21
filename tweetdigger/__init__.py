@@ -48,7 +48,7 @@ def get(**kwargs):
 		tweets = []
 		while True:
 			
-			params, tweet_batch = _get_json_to_tweets(params)
+			params, tweet_batch, status = _get_json_to_tweets(params)
 
 			if status == 'exception':
 				continue
