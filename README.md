@@ -26,6 +26,7 @@ tweet.favorites
 tweet.id
 tweet.permalink
 tweet.verified
+tweet.language
 ```
 
 ## Save to csv file
