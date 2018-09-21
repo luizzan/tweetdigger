@@ -8,7 +8,7 @@ import requests
 import urllib
 from bs4 import BeautifulSoup
 
-__version__ = '0.1.1'
+__version__ = '0.1.2'
 
 """
 kwargs
@@ -49,6 +49,9 @@ def get(**kwargs):
 		while True:
 			
 			params, tweet_batch = _get_json_to_tweets(params)
+
+			if status == 'exception':
+				continue
 
 			if tweet_batch and params['n_tweets'] > 0:
 				remaining = params['n_tweets'] - tweet_count
@@ -136,10 +139,10 @@ def _get_json_to_tweets(params):
 		response = requests.get(url, headers=headers, cookies=params['cookiejar'])
 		json_response = response.json()
 	except:
-		return params, []
+		return params, [], 'exception'
 
 	if len(json_response['items_html'].strip()) == 0:
-		return params, []
+		return params, [], 'finished'
 
 	params['cursor'] = json_response['min_position']
 
@@ -164,4 +167,4 @@ def _get_json_to_tweets(params):
 
 		tweet_batch.append(tweet)
 		
-	return params, tweet_batch
+	return params, tweet_batch, 'working'

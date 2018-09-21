@@ -6,7 +6,7 @@ setup(
     author='Luiz Zanini',
     author_email='tweetdigger@luizzanini.com',
     packages=['tweetdigger'],
-    version='0.1.1',
+    version='0.1.2',
     install_requires = [
     	'beautifulsoup4',
         'requests',
