@@ -8,7 +8,7 @@ import requests
 import urllib
 from bs4 import BeautifulSoup
 
-__version__ = '0.1.3'
+__version__ = '0.1.4'
 
 """
 kwargs
@@ -115,6 +115,10 @@ def _build_url(kwargs):
 	_near = kwargs.pop('near', None)
 	if _near:
 		kwargs['near'] = '"' + _near + '"'
+
+	_by = kwargs.pop('by', None)  # Use 'by' instead of 'from' to avoid syntax conflicts
+	if _by:
+		kwargs['from'] = _by
 	
 	for k, v in kwargs.items():
 		if v:
