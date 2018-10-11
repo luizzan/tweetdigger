@@ -8,7 +8,7 @@ import requests
 import urllib
 from bs4 import BeautifulSoup
 
-__version__ = '0.1.4'
+__version__ = '0.1.5'
 
 """
 kwargs
@@ -156,21 +156,26 @@ def _get_json_to_tweets(params):
 	tweet_batch = []
 	for tw in html_tweets:
 
-		tweet = TweetHolder()
-		tweet.date = tw.find('span', '_timestamp')['data-time']
-		tweet.date = dt.datetime.fromtimestamp(int(tweet.date))
-		tweet.username = tw.find('span', 'username').get_text()
-		tweet.text = tw.find('p', 'tweet-text').get_text()
-		tweet.retweets = tw.find('span', 'ProfileTweet-action--retweet')
-		tweet.retweets = int(tweet.retweets.find('span', 'ProfileTweet-actionCount')['data-tweet-stat-count'])
-		tweet.favorites = tw.find('span', 'ProfileTweet-action--favorite')
-		tweet.favorites = int(tweet.favorites.find('span', 'ProfileTweet-actionCount')['data-tweet-stat-count'])
-		tweet.id = tw['data-item-id']
-		tweet.permalink = 'https://twitter.com' + tw['data-permalink-path']
-		tweet.verified = tw.find('span', 'FullNameGroup').find('span', 'Icon--verified')
-		tweet.verified = True if tweet.verified else False
-		tweet.language = tw.find('p', 'tweet-text')['lang']
+		try:
+			tweet = TweetHolder()
+			tweet.date = tw.find('span', '_timestamp')['data-time']
+			tweet.date = dt.datetime.fromtimestamp(int(tweet.date))
+			tweet.username = tw.find('span', 'username').get_text()
+			tweet.text = tw.find('p', 'tweet-text').get_text()
+			tweet.retweets = tw.find('span', 'ProfileTweet-action--retweet')
+			tweet.retweets = int(tweet.retweets.find('span', 'ProfileTweet-actionCount')['data-tweet-stat-count'])
+			tweet.favorites = tw.find('span', 'ProfileTweet-action--favorite')
+			tweet.favorites = int(tweet.favorites.find('span', 'ProfileTweet-actionCount')['data-tweet-stat-count'])
+			tweet.id = tw['data-item-id']
+			tweet.permalink = 'https://twitter.com' + tw['data-permalink-path']
+			tweet.verified = tw.find('span', 'FullNameGroup').find('span', 'Icon--verified')
+			tweet.verified = True if tweet.verified else False
+			tweet.language = tw.find('p', 'tweet-text')['lang']
 
-		tweet_batch.append(tweet)
+			tweet_batch.append(tweet)
+
+		except:
+			# Avoids issues with withheld or defective tweets.
+			pass
 		
 	return params, tweet_batch, 'working'
