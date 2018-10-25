@@ -8,7 +8,7 @@ import requests
 import urllib
 from bs4 import BeautifulSoup
 
-__version__ = '0.1.7'
+__version__ = '0.1.8'
 
 """
 kwargs
@@ -161,7 +161,7 @@ def _get_json_to_tweets(params):
 
 	headers = {
 		'Host': 'twitter.com',
-		'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36',
+		'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.113 Safari/537.36',
 		'Referer': url,
 		'Connection': 'keep-alive'
 	}
