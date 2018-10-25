@@ -8,7 +8,7 @@ import requests
 import urllib
 from bs4 import BeautifulSoup
 
-__version__ = '0.1.6'
+__version__ = '0.1.7'
 
 """
 kwargs
@@ -56,20 +56,34 @@ def get(**kwargs):
 				csv.writer(f).writerow(cols)
 		
 		tweet_count = 0
+		exception_count = 0
 		tweets = []
 		while True:
 			
 			params, tweet_batch, status = _get_json_to_tweets(params)
 
-			if status == 'exception':
+			if status == 'skipped':
 				continue
 
-			if tweet_batch and params['n_tweets'] > 0:
-				remaining = params['n_tweets'] - tweet_count
-				tweet_batch = tweet_batch[0:remaining]
+			if status == 'finished':
+				break
+
+			# Break if 3 exceptions in a row
+			if status == 'exception':
+				if exception_count >= 3:
+					break
+				else:
+					exception_count += 1
+					continue
+			else:
+				exception_count = 0
 
 			if not tweet_batch:
 				break
+			
+			if params['n_tweets'] > 0:
+				remaining = params['n_tweets'] - tweet_count
+				tweet_batch = tweet_batch[0:remaining]
 
 			tweet_count += len(tweet_batch)
 
@@ -147,7 +161,7 @@ def _get_json_to_tweets(params):
 
 	headers = {
 		'Host': 'twitter.com',
-		'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.103 Safari/537.36',
+		'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36',
 		'Referer': url,
 		'Connection': 'keep-alive'
 	}
@@ -155,42 +169,48 @@ def _get_json_to_tweets(params):
 	try:
 		response = requests.get(url, headers=headers, cookies=params['cookiejar'])
 		json_response = response.json()
+
 	except:
 		return params, [], 'exception'
 
 	if len(json_response['items_html'].strip()) == 0:
 		return params, [], 'finished'
 
-	params['cursor'] = json_response['min_position']
+	if params['cursor'] == json_response['min_position']:
+		# If Twitter has sent the same batch of tweets, skip them
+		return params, [], 'skipped'
 
-	html_tweets = BeautifulSoup(json_response['items_html'], 'lxml').find_all('div', 'tweet')
+	else:
+		params['cursor'] = urllib.parse.quote(json_response['min_position'])
 
-	tweet_batch = []
-	for tw in html_tweets:
+		html_tweets = BeautifulSoup(json_response['items_html'], 'lxml').find_all('div', 'tweet')
 
-		try:
-			tweet = TweetHolder()
-			tweet.date = tw.find('span', '_timestamp')['data-time']
-			tweet.date = dt.datetime.fromtimestamp(int(tweet.date))
-			tweet.username = tw.find('span', 'username').get_text()
-			tweet.text = tw.find('p', 'tweet-text').get_text()
-			tweet.retweets = tw.find('span', 'ProfileTweet-action--retweet')
-			tweet.retweets = int(tweet.retweets.find('span', 'ProfileTweet-actionCount')['data-tweet-stat-count'])
-			tweet.favorites = tw.find('span', 'ProfileTweet-action--favorite')
-			tweet.favorites = int(tweet.favorites.find('span', 'ProfileTweet-actionCount')['data-tweet-stat-count'])
-			tweet.id = tw['data-item-id']
-			tweet.permalink = 'https://twitter.com' + tw['data-permalink-path']
-			tweet.verified = tw.find('span', 'FullNameGroup').find('span', 'Icon--verified')
-			tweet.verified = True if tweet.verified else False
-			tweet.language = tw.find('p', 'tweet-text')['lang']
-			emojis = tw.find('p', 'tweet-text').find_all('img')
-			tweet.emojis = [emoji.get('alt') for emoji in emojis]
-			tweet.emojis = ''.join(tweet.emojis)
+		tweet_batch = []
+		for tw in html_tweets:
 
-			tweet_batch.append(tweet)
+			try:
+				tweet = TweetHolder()
+				tweet.date = tw.find('span', '_timestamp')['data-time']
+				tweet.date = dt.datetime.fromtimestamp(int(tweet.date))
+				tweet.username = tw.find('span', 'username').get_text()
+				tweet.text = tw.find('p', 'tweet-text').get_text()
+				tweet.retweets = tw.find('span', 'ProfileTweet-action--retweet')
+				tweet.retweets = int(tweet.retweets.find('span', 'ProfileTweet-actionCount')['data-tweet-stat-count'])
+				tweet.favorites = tw.find('span', 'ProfileTweet-action--favorite')
+				tweet.favorites = int(tweet.favorites.find('span', 'ProfileTweet-actionCount')['data-tweet-stat-count'])
+				tweet.id = tw['data-item-id']
+				tweet.permalink = 'https://twitter.com' + tw['data-permalink-path']
+				tweet.verified = tw.find('span', 'FullNameGroup').find('span', 'Icon--verified')
+				tweet.verified = True if tweet.verified else False
+				tweet.language = tw.find('p', 'tweet-text')['lang']
+				emojis = tw.find('p', 'tweet-text').find_all('img')
+				tweet.emojis = [emoji.get('alt') for emoji in emojis]
+				tweet.emojis = ''.join(tweet.emojis)
 
-		except:
-			# Avoids issues with withheld or defective tweets.
-			pass
+				tweet_batch.append(tweet)
+
+			except:
+				# Avoids issues with withheld or defective tweets.
+				pass
 		
-	return params, tweet_batch, 'working'
+		return params, tweet_batch, 'working'
