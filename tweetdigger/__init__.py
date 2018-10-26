@@ -8,7 +8,7 @@ import requests
 import urllib
 from bs4 import BeautifulSoup
 
-__version__ = '0.1.8'
+__version__ = '0.1.9'
 
 """
 kwargs
@@ -51,6 +51,7 @@ def get(**kwargs):
 				'verified',
 				'language',
 				'emojis',
+				'date_original',
 			]
 			with open(filename, 'w') as f:
 				csv.writer(f).writerow(cols)
@@ -102,6 +103,7 @@ def get(**kwargs):
 							tweet.verified,
 							tweet.language,
 							tweet.emojis,
+							tweet.date_original,
 						]
 						tws.append(tw)
 
@@ -192,6 +194,12 @@ def _get_json_to_tweets(params):
 				tweet = TweetHolder()
 				tweet.date = tw.find('span', '_timestamp')['data-time']
 				tweet.date = dt.datetime.fromtimestamp(int(tweet.date))
+				tweet.date = tweet.date.astimezone(tz=dt.timezone.utc)
+				try:
+					tweet.date_original = tw.find('a', 'tweet-timestamp')['title']
+					tweet.date_original = dt.datetime.strptime(tweet.date_original, '%I:%M %p - %d %b %Y')
+				except:
+					tweet.date_original = None
 				tweet.username = tw.find('span', 'username').get_text()
 				tweet.text = tw.find('p', 'tweet-text').get_text()
 				tweet.retweets = tw.find('span', 'ProfileTweet-action--retweet')
