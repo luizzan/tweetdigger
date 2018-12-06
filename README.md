@@ -14,6 +14,9 @@ tweets = tweetdigger.get(
 
 for tweet in tweets:
     print(tweet.text)
+
+followers = tweetdigger.get_followers('barackobama')
+print(followers)
 ```
 
 Information available:
@@ -44,7 +47,7 @@ tweetdigger.get(
 
 ## .get() arguments
 - q : str  # Query, e.g. '@barackobama #republicans'
-- by : str  # Tweeted by @...
+- by : str  or [str, str, ..., str]  # Tweeted by @...
 - to : str  # Replying to @...
 - since : str  # YYYY-MM-DD
 - until : str  # YYYY-MM-DD
@@ -53,6 +56,9 @@ tweetdigger.get(
 - within : str  # Radius around location, e.g. 15mi
 - n_tweets : int  # Number of tweets - use 0 for unlimited
 - filename : str  # Save tweets to file
+
+## .get_followers() arguments
+- username : str  # Twitter handle / username
 
 ## Note
 When *not* saving to a csv file, all tweets will be collected and returned in bulk. Be careful when using this mode to collect a large amount of tweets!

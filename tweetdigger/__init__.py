@@ -8,7 +8,7 @@ import requests
 import urllib
 from bs4 import BeautifulSoup
 
-__version__ = '0.1.11'
+__version__ = '0.2.0'
 
 """
 kwargs
@@ -230,3 +230,24 @@ def _get_json_to_tweets(params):
 				pass
 		
 		return params, tweet_batch, 'working'
+
+
+def get_followers(username):
+
+	url = 'https://twitter.com/{}'.format(username.replace('@', ''))
+	cookiejar = http.cookiejar.CookieJar()
+	
+	headers = {
+		'Host': 'twitter.com',
+		'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.113 Safari/537.36',
+		'Referer': url,
+		'Connection': 'keep-alive'
+	}
+
+	try:
+		text = requests.get(url, headers=headers, cookies=cookiejar).text
+		followers = int(re.findall('followers_count&quot;:([0-9]*)', text)[0])
+	except:
+		followers = 0
+
+	return followers
