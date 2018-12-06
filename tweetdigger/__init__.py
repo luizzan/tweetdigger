@@ -8,7 +8,7 @@ import requests
 import urllib
 from bs4 import BeautifulSoup
 
-__version__ = '0.1.9'
+__version__ = '0.1.10'
 
 """
 kwargs
@@ -172,11 +172,11 @@ def _get_json_to_tweets(params):
 		response = requests.get(url, headers=headers, cookies=params['cookiejar'])
 		json_response = response.json()
 
+		if len(json_response['items_html'].strip()) == 0:
+		return params, [], 'finished'
+
 	except:
 		return params, [], 'exception'
-
-	if len(json_response['items_html'].strip()) == 0:
-		return params, [], 'finished'
 
 	if params['cursor'] == json_response['min_position']:
 		# If Twitter has sent the same batch of tweets, skip them
