@@ -8,7 +8,7 @@ import requests
 import urllib
 from bs4 import BeautifulSoup
 
-__version__ = '0.1.10'
+__version__ = '0.1.11'
 
 """
 kwargs
@@ -140,13 +140,21 @@ def _build_url(kwargs):
 	url_add = ''
 	url_add += kwargs.pop('q', '')
 
+	# Use 'by' instead of 'from' to avoid syntax conflicts
+	# "from" should come just after "q" ?
+	_bys = kwargs.pop('by', None)
+	if _bys:
+		if type(_bys) == list:
+			_bys = [i.replace('@', '') for i in _bys]
+			url_add += ' from:{}'.format(_bys[0])
+			for _by in _bys[1:]:
+				url_add += ' OR from:{}'.format(_by)
+		else:
+			url_add += ' from:{}'.format(_bys.replace('@', ''))
+
 	_near = kwargs.pop('near', None)
 	if _near:
 		kwargs['near'] = '"' + _near + '"'
-
-	_by = kwargs.pop('by', None)  # Use 'by' instead of 'from' to avoid syntax conflicts
-	if _by:
-		kwargs['from'] = _by
 	
 	for k, v in kwargs.items():
 		if v:
