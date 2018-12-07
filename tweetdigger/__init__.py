@@ -8,7 +8,7 @@ import requests
 import urllib
 from bs4 import BeautifulSoup
 
-__version__ = '0.2.0'
+__version__ = '0.2.1'
 
 """
 kwargs
@@ -232,22 +232,76 @@ def _get_json_to_tweets(params):
 		return params, tweet_batch, 'working'
 
 
-def get_followers(username):
+def get_info(username, filename=''):
+	
+	if type(username) == list:
+		info = []
+		for _username in username:
+			info.append(_get_info(_username, filename))
+	else:
+		info = _get_info(username, filename)
 
+	return info
+
+
+def _get_info(username, filename=''):
+
+	username = username.replace('@', '')
 	url = 'https://twitter.com/{}'.format(username.replace('@', ''))
 	cookiejar = http.cookiejar.CookieJar()
-	
-	headers = {
-		'Host': 'twitter.com',
-		'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.113 Safari/537.36',
-		'Referer': url,
-		'Connection': 'keep-alive'
-	}
+	headers = get_headers(url)
 
+	info = PlaceHolder()
 	try:
-		text = requests.get(url, headers=headers, cookies=cookiejar).text
-		followers = int(re.findall('followers_count&quot;:([0-9]*)', text)[0])
-	except:
-		followers = 0
+		soup = BeautifulSoup(requests.get(url, headers=headers, cookies=cookiejar).content, features='lxml')
+		info.username = username
+		info.handle = username
+		info.name = soup.find('title').text.split(' (')[0]
+		info.followers = int(soup.find('li', 'ProfileNav-item--followers').find('span', 'ProfileNav-value')['data-count'])
+		info.following = int(soup.find('li', 'ProfileNav-item--following').find('span', 'ProfileNav-value')['data-count'])
+		info.likes = int(soup.find('li', 'ProfileNav-item--favorites').find('span', 'ProfileNav-value')['data-count'])
+		info.favorites = info.likes
+		info.tweets = int(soup.find('li', 'ProfileNav-item--tweets').find('span', 'ProfileNav-value')['data-count'])
+		info.location = soup.find('span', 'ProfileHeaderCard-locationText').text.replace('\n', '').strip()
+		description = soup.find_all('meta')[2]['content']
+		description = re.findall('The latest.*{}\)\. (.*)'.format(username), description)
+		if description:
+			info.description = re.sub('. {}$'.format(info.location), '', description[0])
+		else:
+			info.description = ''
+		info.error = ''
+	except Exception as e:
+		print('Error. No data found for @{}'.format(username))
+		print(sys.exc_info()[0])
+		print(e)
+		return
 
-	return followers
+	if filename:
+		if not os.path.isfile(filename):
+			cols = [
+				'username',
+				'name',
+				'followers',
+				'following',
+				'likes',
+				'tweets',
+				'location',
+				'description',
+			]
+			with open(filename, 'w') as f:
+				csv.writer(f).writerow(cols)
+
+		_info = [
+			info.username,
+			info.name,
+			info.followers,
+			info.following,
+			info.likes,
+			info.tweets,
+			info.location,
+			info.description,
+		]
+		with open(filename, 'a') as f:
+			csv.writer(f).writerow(_info)
+
+	return info
