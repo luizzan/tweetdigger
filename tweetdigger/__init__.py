@@ -8,7 +8,7 @@ import requests
 import urllib
 from bs4 import BeautifulSoup
 
-__version__ = '0.2.2'
+__version__ = '0.2.3'
 
 """
 kwargs
@@ -24,12 +24,22 @@ kwargs
 - filename : str  # Save tweets to file
 """
 
-class TweetHolder():
+class PlaceHolder():
 	# Placeholder class to store each component of a tweet
 	pass
 
 
-def get(**kwargs):
+def _get_headers(url):
+	headers = {
+		'Host': 'twitter.com',
+		'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.113 Safari/537.36',
+		'Referer': url,
+		'Connection': 'keep-alive'
+	}
+	return headers
+
+
+def get_tweets(**kwargs):
 
 		filename = kwargs.pop('filename', '')
 
@@ -168,13 +178,7 @@ def _build_url(kwargs):
 def _get_json_to_tweets(params):
 
 	url = params['url'] + '&max_position={}'.format(params['cursor'])
-
-	headers = {
-		'Host': 'twitter.com',
-		'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.113 Safari/537.36',
-		'Referer': url,
-		'Connection': 'keep-alive'
-	}
+	headers = _get_headers(url)
 
 	try:
 		response = requests.get(url, headers=headers, cookies=params['cookiejar'])
@@ -199,7 +203,7 @@ def _get_json_to_tweets(params):
 		for tw in html_tweets:
 
 			try:
-				tweet = TweetHolder()
+				tweet = PlaceHolder()
 				tweet.date = tw.find('span', '_timestamp')['data-time']
 				tweet.date = dt.datetime.fromtimestamp(int(tweet.date))
 				tweet.date = tweet.date.astimezone(tz=dt.timezone.utc)
@@ -249,7 +253,7 @@ def _get_info(username, filename=''):
 	username = username.replace('@', '')
 	url = 'https://twitter.com/{}'.format(username.replace('@', ''))
 	cookiejar = http.cookiejar.CookieJar()
-	headers = get_headers(url)
+	headers = _get_headers(url)
 
 	info = PlaceHolder()
 	try:
