@@ -8,7 +8,7 @@ import requests
 import urllib
 from bs4 import BeautifulSoup
 
-__version__ = '0.2.1'
+__version__ = '0.2.2'
 
 """
 kwargs
@@ -181,7 +181,7 @@ def _get_json_to_tweets(params):
 		json_response = response.json()
 
 		if len(json_response['items_html'].strip()) == 0:
-		return params, [], 'finished'
+			return params, [], 'finished'
 
 	except:
 		return params, [], 'exception'
