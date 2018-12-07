@@ -7,8 +7,9 @@ import http.cookiejar
 import requests
 import urllib
 from bs4 import BeautifulSoup
+import os
 
-__version__ = '0.2.3'
+__version__ = '0.2.4'
 
 """
 kwargs
