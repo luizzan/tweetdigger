@@ -9,7 +9,7 @@ import urllib
 from bs4 import BeautifulSoup
 import os
 
-__version__ = '0.2.4'
+__version__ = '0.2.5'
 
 """
 kwargs
@@ -63,6 +63,7 @@ def get_tweets(**kwargs):
 				'language',
 				'emojis',
 				'date_original',
+				'is_reply',
 			]
 			with open(filename, 'w') as f:
 				csv.writer(f).writerow(cols)
@@ -115,6 +116,7 @@ def get_tweets(**kwargs):
 							tweet.language,
 							tweet.emojis,
 							tweet.date_original,
+							tweet.is_reply,
 						]
 						tws.append(tw)
 
@@ -227,6 +229,8 @@ def _get_json_to_tweets(params):
 				emojis = tw.find('p', 'tweet-text').find_all('img')
 				tweet.emojis = [emoji.get('alt') for emoji in emojis]
 				tweet.emojis = ''.join(tweet.emojis)
+				tweet.is_reply = tw.get('data-is-reply-to', '')
+				tweet.is_reply = True if tweet.is_reply else False
 
 				tweet_batch.append(tweet)
 
